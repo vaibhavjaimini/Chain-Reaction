@@ -1,0 +1,174 @@
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Queue;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+
+public class ChainReaction extends JFrame implements MouseListener{
+	GridBagConstraints cst;
+	int turn=0, cnt=0;
+	Color player1, player2;
+	Font font = new Font("temp", Font.BOLD, 20);
+	JLabel player, values[][] = new JLabel[10][10];
+	JPanel box, blocks[][] = new JPanel[10][10];
+	
+	public ChainReaction() {
+		setLayout(new GridLayout());
+		player1 = new Color(0, 255, 0);
+		player2 = new Color(255, 0, 0);
+		box = new JPanel();
+		box.setLayout(new GridLayout(10, 10));
+		for(int i=0; i<10; i++)
+			for(int j=0; j<10; j++)
+			{ 				
+				values[i][j] = new JLabel(" ");
+				values[i][j].setFont(font);
+				blocks[i][j] = new JPanel();
+				blocks[i][j].add(values[i][j]);
+				blocks[i][j].addMouseListener(this);
+				blocks[i][j].setBorder(BorderFactory.createLineBorder(player1));
+				box.add(blocks[i][j]);
+			}
+		add(box);
+		setSize(500,500);
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		ChainReaction game=new ChainReaction();
+	}
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		int i, j, flag=0;
+		for(i=0; i<10; i++)
+		{
+			for(j=0; j<10; j++)
+				if(blocks[i][j] == arg0.getSource())
+				{
+					if(values[i][j].getText().equals(" "))
+					{
+						if(turn == 0)
+							values[i][j].setForeground(player1);
+						else
+							values[i][j].setForeground(player2);
+						values[i][j].setText("0");
+					}
+					if(turn == 0 && values[i][j].getForeground() == player1 || turn == 1 && values[i][j].getForeground() == player2){
+						Color winner;
+						if(turn == 0)
+							winner = player1;
+						else
+							winner = player2;
+						int temp = Integer.parseInt(values[i][j].getText());
+						temp++;
+						bfs(i, j);
+						flag=0;
+						for(int k=0; k<10; k++)
+							for(int l=0; l<10; l++)
+								if(winner != values[k][l].getForeground())
+								{
+									flag=1;
+									break;
+								}
+						if(flag == 0 && cnt==1)
+						{
+							JOptionPane.showConfirmDialog(this, "Player " + (turn+1) + " wins");
+						}
+						turn = 1 - turn;
+						for(int k=0; k<10; k++)
+							for(int l=0; l<10; l++)
+							{
+								if(turn == 0)
+									blocks[k][l].setBorder(BorderFactory.createLineBorder(player1));
+								else
+									blocks[k][l].setBorder(BorderFactory.createLineBorder(player2));
+								
+							}
+						cnt=1;
+					}
+					break;
+				}
+			if(j!=10)
+				break;
+		}
+	}
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	void bfs(int i, int j)
+	{
+		if(i < 0 || i > 9 || j < 0 || j > 9)
+			return ;
+		
+		Color color;
+		if(turn == 0)
+			color = player1;
+		else
+			color = player2;
+		values[i][j].setForeground(color);
+		if(values[i][j].getText().equals(" "))
+			values[i][j].setText("0");
+		int temp = Integer.parseInt(values[i][j].getText());
+		temp++;
+		values[i][j].setText(""+temp);
+		if(checkExplode(i, j))
+		{
+			values[i][j].setText(" ");
+			try {
+				this.bfs(i-1, j);
+				Thread.sleep(100);
+				this.bfs(i+1, j);
+				Thread.sleep(100);
+				this.bfs(i,  j-1);
+				Thread.sleep(100);
+				this.bfs(i, j+1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	boolean checkExplode(int i, int j)
+	{
+		int deg=0, temp = Integer.parseInt(values[i][j].getText());
+		if(i == 0 || i == 9)
+			deg++;
+		if(j == 0 || j == 9)
+			deg++;
+		if(4-deg == temp)
+				return true;
+		return false;
+	}
+}
