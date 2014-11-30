@@ -76,15 +76,32 @@ public class ChainReaction extends JFrame implements MouseListener{
 						bfs(i, j);
 						flag=0;
 						for(int k=0; k<10; k++)
-							for(int l=0; l<10; l++)
-								if(winner != values[k][l].getForeground())
-								{
-									flag=1;
-									break;
-								}
-						if(flag == 0 && cnt==1)
 						{
-							JOptionPane.showConfirmDialog(this, "Player " + (turn+1) + " wins");
+							for(int l=0; l<10; l++)
+								if(!values[k][l].getText().equals(" "))
+									if(winner !=  values[k][l].getForeground())
+									{
+										flag=1;
+										break;
+									}
+							if(flag == 1)
+								break;
+						}
+						if(flag == 0 && cnt == 1)
+						{
+							int t=JOptionPane.showConfirmDialog(this, "Player " + (turn+1) + " wins\n Play Again??", "Game Ended", JOptionPane.YES_OPTION);
+							if(t == JOptionPane.NO_OPTION)
+								System.exit(0);
+							else
+							{
+								cnt=0;
+								for(int k=0; k<10; k++)
+									for(int l=0; l<10; l++)
+									{
+										values[k][l].setText(" ");
+										blocks[k][l].setBorder(BorderFactory.createLineBorder(Color.red));
+									}
+							}
 						}
 						turn = 1 - turn;
 						for(int k=0; k<10; k++)
