@@ -1,27 +1,84 @@
 import java.awt.Color;
-import java.awt.Font;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Queue;
-
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
+
+
+class Value extends JLabel
+{
+	int val;
+	Color clr;
+	Value()
+	{
+	val=0;
+	}
+	int x=0,velx=2;
+	public void paint(Graphics g)
+	{
+		Dimension size = getSize();
+		if(val==1)
+		{
+			int x = (size.width)/6;
+			int y = (size.height)/6;
+			g.drawOval(2*x, 2*y, 2*x, 2*y);
+			g.setColor(clr);
+			g.fillOval(2*x, 2*y, 2*x, 2*y);
+		}
+		else if(val==2)
+		{
+			int x = (size.width)/6;
+			int y = (size.height)/6;
+			//Color r=new Color(0,225,0);
+			g.drawOval(x, 2*y, 2*x, 2*y);
+			g.setColor(clr);
+			g.fillOval(x, 2*y, 2*x, 2*y);
+			
+			g.drawOval(3*x, 2*y, 2*x, 2*y);
+			g.setColor(clr);
+			g.fillOval(3*x, 2*y, 2*x, 2*y);
+		}
+		else if(val==3)
+		{
+			int x = (size.width)/6;
+			int y = (size.height)/6;
+			
+			g.drawOval(2*x, y, 2*x, 2*y);
+			g.setColor(clr);
+			g.fillOval(2*x, y, 2*x, 2*y);
+			
+			g.drawOval(x, 3*y, 2*x, 2*y);
+			g.setColor(clr);
+			g.fillOval(x, 3*y, 2*x, 2*y);
+			
+			g.drawOval(3*x, 3*y, 2*x, 2*y);
+			g.setColor(clr);
+			g.fillOval(3*x, 3*y, 2*x, 2*y);
+			
+		}
+		
+	}
+
+}
 
 public class ChainReaction extends JFrame implements MouseListener{
 	GridBagConstraints cst;
 	int turn=0, cnt=0;
 	Color player1, player2;
-	Font font = new Font("temp", Font.BOLD, 20);
-	JLabel player, values[][] = new JLabel[10][10];
-	JPanel box, blocks[][] = new JPanel[10][10];
 	
+	Value player, values[][] = new Value[10][10];
+	JPanel box, blocks[][] = new JPanel[10][10];
 	public ChainReaction() {
 		setLayout(new GridLayout());
 		player1 = new Color(0, 255, 0);
@@ -31,14 +88,17 @@ public class ChainReaction extends JFrame implements MouseListener{
 		for(int i=0; i<10; i++)
 			for(int j=0; j<10; j++)
 			{ 				
-				values[i][j] = new JLabel(" ");
-				values[i][j].setFont(font);
+				values[i][j] = new Value();
 				blocks[i][j] = new JPanel();
+				blocks[i][j].setLayout(new GridLayout());
 				blocks[i][j].add(values[i][j]);
 				blocks[i][j].addMouseListener(this);
 				blocks[i][j].setBorder(BorderFactory.createLineBorder(player1));
+				blocks[i][j].setBackground(new Color(0,0,0));
 				box.add(blocks[i][j]);
 			}
+	
+		
 		add(box);
 		setSize(500,500);
 		setVisible(true);
@@ -57,13 +117,13 @@ public class ChainReaction extends JFrame implements MouseListener{
 			for(j=0; j<10; j++)
 				if(blocks[i][j] == arg0.getSource())
 				{
-					if(values[i][j].getText().equals(" "))
+					if(values[i][j].val==0)
 					{
 						if(turn == 0)
 							values[i][j].setForeground(player1);
 						else
 							values[i][j].setForeground(player2);
-						values[i][j].setText("0");
+						
 					}
 					if(turn == 0 && values[i][j].getForeground() == player1 || turn == 1 && values[i][j].getForeground() == player2){
 						Color winner;
@@ -71,14 +131,13 @@ public class ChainReaction extends JFrame implements MouseListener{
 							winner = player1;
 						else
 							winner = player2;
-						int temp = Integer.parseInt(values[i][j].getText());
-						temp++;
+						
 						bfs(i, j);
 						flag=0;
 						for(int k=0; k<10; k++)
 						{
 							for(int l=0; l<10; l++)
-								if(!values[k][l].getText().equals(" "))
+								if(!(values[k][l].val==0))
 									if(winner !=  values[k][l].getForeground())
 									{
 										flag=1;
@@ -94,13 +153,8 @@ public class ChainReaction extends JFrame implements MouseListener{
 								System.exit(0);
 							else
 							{
-								cnt=0;
-								for(int k=0; k<10; k++)
-									for(int l=0; l<10; l++)
-									{
-										values[k][l].setText(" ");
-										blocks[k][l].setBorder(BorderFactory.createLineBorder(Color.red));
-									}
+								this.dispose();
+								new ChainReaction();
 							}
 						}
 						turn = 1 - turn;
@@ -144,6 +198,7 @@ public class ChainReaction extends JFrame implements MouseListener{
 	
 	void bfs(int i, int j)
 	{
+		
 		if(i < 0 || i > 9 || j < 0 || j > 9)
 			return ;
 		
@@ -153,33 +208,40 @@ public class ChainReaction extends JFrame implements MouseListener{
 		else
 			color = player2;
 		values[i][j].setForeground(color);
-		if(values[i][j].getText().equals(" "))
-			values[i][j].setText("0");
-		int temp = Integer.parseInt(values[i][j].getText());
-		temp++;
-		values[i][j].setText(""+temp);
+		
+		values[i][j].val++; 
+		blocks[i][j].removeAll();
+		blocks[i][j].add(values[i][j]);
+		
+		//Time Delay---
+		//long now = System.currentTimeMillis();
+		//long then = now + 1000; // one second of milliseconds
+		//while (System.currentTimeMillis() < then);
+		
 		if(checkExplode(i, j))
 		{
-			values[i][j].setText(" ");
-			try {
-				this.bfs(i-1, j);
-				Thread.sleep(100);
-				this.bfs(i+1, j);
-				Thread.sleep(100);
-				this.bfs(i,  j-1);
-				Thread.sleep(100);
-				this.bfs(i, j+1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			values[i][j].val=0;
+			blocks[i][j].removeAll();
+			blocks[i][j].updateUI();
+			 
+			this.bfs(i-1, j);
+	
+			this.bfs(i+1, j);
+				
+			this.bfs(i,  j-1);
+					
+			this.bfs(i, j+1);
+				
 			
 		}
+		
+			
 	}
 	
 	boolean checkExplode(int i, int j)
 	{
-		int deg=0, temp = Integer.parseInt(values[i][j].getText());
+		
+		int deg=0, temp = values[i][j].val;
 		if(i == 0 || i == 9)
 			deg++;
 		if(j == 0 || j == 9)
@@ -189,3 +251,4 @@ public class ChainReaction extends JFrame implements MouseListener{
 		return false;
 	}
 }
+
