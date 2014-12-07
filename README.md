@@ -1,3 +1,10 @@
 Chain-Reaction
 ==============
-Trying to make a multi player version of chain reaction for a better and innovative world.
+
+TRYING TO MAKE A MULTIPLAYER PC VERSION OF FAMOUS GAME CHAIN REACTION USING CLIENT AND SERVER STUFF.
+
+COMPILE ALL THE FILES USING javac.
+
+EXECUTE THE Main.class FILE
+
+MAKE A SERVER AND SOME CLIENTS, ENJOY THE GAME :)
