@@ -29,7 +29,7 @@ public class Client extends JFrame implements Runnable, ActionListener{
 		clientLabel =  new JLabel("Client");
 		address = new JLabel("Enter Address:");
 		text = new JTextField(200);
-		submit = new JButton("Start Server");
+		submit = new JButton("Connect");
 		clientLabel.setBounds(175, 50, 50, 30);
 		address.setBounds(150, 100, 200, 30);
 		text.setBounds(100, 150, 200, 30);
