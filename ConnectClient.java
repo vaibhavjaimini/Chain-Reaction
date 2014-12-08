@@ -40,11 +40,11 @@ public class ConnectClient extends Thread{
 				str=read.nextLine();
 				if(str.equals("Game Over")){
 					MyServer.gameOver[id] = true;
-					System.out.println(id + " Game Over");
+				//	System.out.println(id + " Game Over");
 					continue;
 				}
 				else if( str.equals("Game Not Over")){
-					System.out.println(id + " Game Not Over");
+				//	System.out.println(id + " Game Not Over");
 					continue;
 				}
 				else if(str.equals("Calculate Turn"))
@@ -73,7 +73,8 @@ public class ConnectClient extends Thread{
 //				System.out.println(MyServer.connectedSocks.size());
 				if(MyServer.connectedSocks.size() == 0)
 						MyServer.close = true;
-				System.out.println(MyServer.close);
+				MyServer.addFeed("Client " + (id+1) + " Has Left");
+			//	System.out.println(MyServer.close);
 				break;
 			}
 		}
