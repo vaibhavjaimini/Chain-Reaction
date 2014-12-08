@@ -9,7 +9,11 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Queue;
 import java.util.Scanner;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -25,7 +29,6 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 	int turn, noOfPlayers, id, winnerId;
 	Color player[] = new Color[8];
 	JPanel grid;
-	Font font = new Font("temp", Font.BOLD, 20);
 	JLabel yourColor, values[][]= new JLabel[8][6], playerId;
 	JPanel blocks[][] = new JPanel[8][6];
 	boolean gameOver, winner, hasPlayedOnce, allHavePlayedOnce;
@@ -61,8 +64,8 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 			for(j=0; j<6; j++)
 			{
 				values[i][j] = new JLabel("");
+				values[i][j].setFont(new Font("font", Font.BOLD, 20));
 				blocks[i][j] = new JPanel();
-				values[i][j].setFont(font);
 				blocks[i][j].add(values[i][j]);
 				blocks[i][j].setSize(50, 50);
 				blocks[i][j].setBackground(Color.BLACK);
@@ -159,7 +162,7 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 				temp = str.split(" ");
 				i=Integer.parseInt(temp[0]);
 				j=Integer.parseInt(temp[1]);
-				dfs(i, j);
+				bfs(i, j);
 				if(allHavePlayedOnce)
 				{
 					if(id == turn){
@@ -208,23 +211,46 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 			}
 		}
 	}
-	void dfs(int i, int j)
+	
+	
+	void bfs(int i, int j)
 	{
+		class Node
+		{
+			int i, j;
+			public Node(int i, int j) {
+				// TODO Auto-generated constructor stub
+				this.i = i;
+				this.j = j;
+			}
+		}
 		int temp;
-		if(i < 0 || j<0 || i>7 || j>5)
-			return ;
-		values[i][j].setForeground(player[turn]);
-		if(values[i][j].getText().equals(""))
-			values[i][j].setText("0");
-		temp = Integer.parseInt(values[i][j].getText());
-		temp++;
-		values[i][j].setText(""+temp);
-		if(chkExplode(i, j)){
-			values[i][j].setText("");
-			dfs(i-1, j);
-			dfs(i+1, j);
-			dfs(i, j+1);
-			dfs(i, j-1);
+		Vector<Node> queue = new Vector();
+		queue.add(new Node(i, j));
+		
+		while(queue.size() != 0)
+		{
+			Node topNode = queue.get(0);
+			if(topNode.i < 0 || topNode.i > 7 || topNode.j < 0 || topNode.j > 5)
+			{
+				queue.remove(0);
+				continue;
+			}
+			values[topNode.i][topNode.j].setForeground(player[turn]);
+			if(values[topNode.i][topNode.j].getText().equals(""))
+				values[topNode.i][topNode.j].setText("0");
+			temp = Integer.parseInt(values[topNode.i][topNode.j].getText());
+			temp++;
+			values[topNode.i][topNode.j].setText(""+temp);
+			queue.remove(0);
+			if(chkExplode(topNode.i, topNode.j))
+			{
+				values[topNode.i][topNode.j].setText("");
+				queue.add(new Node(topNode.i-1, topNode.j));
+				queue.add(new Node(topNode.i+1, topNode.j));
+				queue.add(new Node(topNode.i, topNode.j-1));
+				queue.add(new Node(topNode.i, topNode.j+1));
+			}
 		}
 	}
 	boolean chkExplode(int i, int j)
