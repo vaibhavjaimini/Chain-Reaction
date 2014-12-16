@@ -32,7 +32,7 @@ public class MyServer extends JFrame implements ActionListener, Runnable{
 	static JFrame serverFrame;
 	ServerSocket server;
 	static int noOfPlayers, port = 2303, turn;
-	static boolean start=false, gameOver[], close;
+	static boolean start=false, gameOver[], close, allHaveSentStatus, hasSentStatus[];
 	public MyServer() {
 		setLayout(null);
 		turn = 0;
@@ -70,6 +70,10 @@ public class MyServer extends JFrame implements ActionListener, Runnable{
 			else
 				try {
 					gameOver = new boolean[noOfPlayers];
+					hasSentStatus = new boolean[noOfPlayers];
+					allHaveSentStatus = false;
+					for(int i=0; i<hasSentStatus.length; i++)
+						hasSentStatus[i] = false;
 					startServer();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
