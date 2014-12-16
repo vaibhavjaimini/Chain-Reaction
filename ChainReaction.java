@@ -1,17 +1,11 @@
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Queue;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -31,7 +25,7 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 	JPanel grid;
 	JLabel yourColor, values[][]= new JLabel[8][6], playerId;
 	JPanel blocks[][] = new JPanel[8][6];
-	boolean gameOver, winner, hasPlayedOnce, allHavePlayedOnce;
+	boolean gameOver, winner, hasPlayedOnce, allHavePlayedOnce, hasSent;
 	public ChainReaction(Socket socket, int noOfPlayers, int id) throws IOException {
 		// TODO Auto-generated constructor stub
 		this.socket = socket;
@@ -96,15 +90,16 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 		for(i=0; i<8; i++)
 		for(j=0; j<6; j++)
 			if(blocks[i][j] == arg0.getSource()){
-				if(values[i][j].getText().equals(""))
+				if(values[i][j].getText().equals("") && !hasSent)
 				{
 					values[i][j].setText("0");
 					values[i][j].setForeground(player[turn]);
 				}
-				if(values[i][j].getForeground() == player[turn])
+				if(values[i][j].getForeground() == player[turn] && !hasSent)
 				{
 					hasPlayedOnce = true;
 					ps.println(i+" "+j);
+					hasSent = true;
 				}
 			}
 	}
@@ -172,6 +167,7 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 						else
 							winnerId = -1;
 						ps.println(winnerId);
+						System.out.println(winnerId);
 					}
 					str = read.nextLine();
 					winnerId = Integer.parseInt(str);
@@ -185,6 +181,7 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 				}
 				else if(turn == noOfPlayers-1)
 					allHavePlayedOnce=true;
+				
 				if(hasPlayedOnce){
 					if(chkGameOver()){
 						ps.println("Game Over");
@@ -199,6 +196,8 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 					ps.println("Calculate Turn");
 				str = read.nextLine();
 				turn = Integer.parseInt(str);
+				if(id == turn )
+					hasSent = false;
 				for(i=0; i<8; i++)
 				for(j=0; j<6; j++)
 				{
@@ -242,6 +241,23 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 			temp = Integer.parseInt(values[topNode.i][topNode.j].getText());
 			temp++;
 			values[topNode.i][topNode.j].setText(""+temp);
+			Thread t = new Thread(){
+				public void run() {
+					try {
+						sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				};
+			};
+			t.start();
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			queue.remove(0);
 			if(chkExplode(topNode.i, topNode.j))
 			{
