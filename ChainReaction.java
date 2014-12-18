@@ -158,29 +158,6 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 				i=Integer.parseInt(temp[0]);
 				j=Integer.parseInt(temp[1]);
 				bfs(i, j);
-				if(allHavePlayedOnce)
-				{
-					if(id == turn){
-						chkGameOver();
-						if(winner)
-							winnerId = id;
-						else
-							winnerId = -1;
-						ps.println(winnerId);
-						System.out.println(winnerId);
-					}
-					str = read.nextLine();
-					winnerId = Integer.parseInt(str);
-					if(winnerId != -1)
-					{
-						JOptionPane.showMessageDialog(this,"Player " + (winnerId+1) + " wins");
-						this.dispose();
-						ps = null;
-						System.exit(0);
-					}
-				}
-				else if(turn == noOfPlayers-1)
-					allHavePlayedOnce=true;
 				
 				if(hasPlayedOnce){
 					if(chkGameOver()){
@@ -258,6 +235,28 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			if(allHavePlayedOnce){
+				if(id == turn)
+				{
+					chkGameOver();
+					if(winner)
+						ps.println(id);
+					else
+						ps.println(-1);
+				}
+				String str = read.nextLine();
+				winnerId = Integer.parseInt(str);
+				if(winnerId != -1)
+				{
+					JOptionPane.showMessageDialog(this,"Player " + (winnerId+1) + " wins");
+					this.dispose();
+					ps = null;
+					System.exit(0);
+					return;
+				}
+			}
+			else if(turn == noOfPlayers-1)
+				allHavePlayedOnce = true;
 			queue.remove(0);
 			if(chkExplode(topNode.i, topNode.j))
 			{
