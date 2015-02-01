@@ -1,6 +1,10 @@
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
@@ -15,7 +19,57 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-
+class Value extends JLabel{
+	int val;
+	Color clr;
+	Value()
+	{
+		val=0;
+	}
+	
+	public void paintComponent(Graphics g)
+	{
+		Dimension dim=getSize();
+		int x=dim.width/6;
+		int y=dim.height/6;
+		Graphics2D g2=(Graphics2D) g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		if(val==1)
+		{
+			g2.drawOval(2*x, 2*y, 2*x, 2*y);
+			g2.setColor(clr);
+			g2.fillOval(2*x, 2*y, 2*x, 2*y);
+		}
+		else if(val==2)
+		{
+		
+			g2.drawOval(x, 2*y, 2*x, 2*y);
+			g2.setColor(clr);
+			g2.fillOval(x, 2*y, 2*x, 2*y);
+			
+			g2.drawOval(3*x, 2*y, 2*x, 2*y);
+			g2.setColor(clr);
+			g2.fillOval(3*x, 2*y, 2*x, 2*y);
+		}
+		else if(val==3)
+		{
+			
+			g2.drawOval(2*x, y, 2*x, 2*y);
+			g2.setColor(clr);
+			g2.fillOval(2*x, y, 2*x, 2*y);
+			
+			g2.drawOval(x, 3*y, 2*x, 2*y);
+			g2.setColor(clr);
+			g2.fillOval(x, 3*y, 2*x, 2*y);
+			
+			g2.drawOval(3*x, 3*y, 2*x, 2*y);
+			g2.setColor(clr);
+			g2.fillOval(3*x, 3*y, 2*x, 2*y);
+			
+		}
+	}
+	
+}
 public class ChainReaction extends JFrame implements MouseListener, Runnable{
 	Socket socket;
 	PrintStream ps;
@@ -23,7 +77,8 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 	int turn, noOfPlayers, id, winnerId;
 	Color player[] = new Color[8];
 	JPanel grid;
-	JLabel yourColor, values[][]= new JLabel[8][6], playerId;
+	JLabel yourColor, playerId;
+	Value values[][]= new Value[8][6];
 	JPanel blocks[][] = new JPanel[8][6];
 	boolean gameOver, winner, hasPlayedOnce, allHavePlayedOnce, hasSent;
 	public ChainReaction(Socket socket, int noOfPlayers, int id) throws IOException {
@@ -57,7 +112,7 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 		for(i=0; i<8; i++)
 			for(j=0; j<6; j++)
 			{
-				values[i][j] = new JLabel("");
+				values[i][j] = new Value();
 				values[i][j].setFont(new Font("font", Font.BOLD, 20));
 				blocks[i][j] = new JPanel();
 				blocks[i][j].add(values[i][j]);
@@ -65,7 +120,7 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 				blocks[i][j].setBackground(Color.BLACK);
 				if(id == 0)
 				blocks[i][j].addMouseListener(this);
-				
+				blocks[i][j].setLayout(new GridLayout());
 				blocks[i][j].setBorder(BorderFactory.createLineBorder(player[0]));
 				grid.add(blocks[i][j]);
 			}
@@ -90,9 +145,9 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 		for(i=0; i<8; i++)
 		for(j=0; j<6; j++)
 			if(blocks[i][j] == arg0.getSource()){
-				if(values[i][j].getText().equals("") && !hasSent)
+				if(values[i][j].val==0 && !hasSent)
 				{
-					values[i][j].setText("0");
+					values[i][j].val=0;
 					values[i][j].setForeground(player[turn]);
 				}
 				if(values[i][j].getForeground() == player[turn] && !hasSent)
@@ -129,7 +184,7 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 		for(i=0; i<8; i++)
 		for(j=0; j<6; j++)
 		{
-			if(!values[i][j].getText().equals(""))
+			if(!(values[i][j].val==0))
 			{
 				nonZero++;
 				if(values[i][j].getForeground() == player[id])
@@ -213,11 +268,8 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 				continue;
 			}
 			values[topNode.i][topNode.j].setForeground(player[turn]);
-			if(values[topNode.i][topNode.j].getText().equals(""))
-				values[topNode.i][topNode.j].setText("0");
-			temp = Integer.parseInt(values[topNode.i][topNode.j].getText());
-			temp++;
-			values[topNode.i][topNode.j].setText(""+temp);
+			values[topNode.i][topNode.j].val++;
+			blocks[i][j].updateUI();
 			Thread t = new Thread(){
 				public void run() {
 					try {
@@ -260,7 +312,7 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 			queue.remove(0);
 			if(chkExplode(topNode.i, topNode.j))
 			{
-				values[topNode.i][topNode.j].setText("");
+				values[topNode.i][topNode.j].val=0;
 				queue.add(new Node(topNode.i-1, topNode.j));
 				queue.add(new Node(topNode.i+1, topNode.j));
 				queue.add(new Node(topNode.i, topNode.j-1));
@@ -270,12 +322,12 @@ public class ChainReaction extends JFrame implements MouseListener, Runnable{
 	}
 	boolean chkExplode(int i, int j)
 	{
-		int deg=0, val = Integer.parseInt(values[i][j].getText());
+		int deg=0;
 		if(i == 0 || i == 7)
 			deg++;
 		if(j == 0 || j == 5)
 			deg++;
-		if(4-deg == val)
+		if(4-deg == values[i][j].val)
 			return true;
 		return false;
 	}
